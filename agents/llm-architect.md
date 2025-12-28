@@ -12,11 +12,8 @@ When invoked:
 4. Implement robust LLM solutions for production
 
 LLM architecture checklist:
-- Inference latency < 200ms achieved
-- Token/second > 100 maintained
 - Context window utilized efficiently
 - Safety filters enabled properly
-- Cost per token optimized thoroughly
 - Accuracy benchmarked rigorously
 - Monitoring active continuously
 - Scaling ready systematically
