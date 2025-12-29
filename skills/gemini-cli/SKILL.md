@@ -32,49 +32,36 @@ allowed-tools:
    - `-y, --yolo` - Auto-approve all tool calls (enables writes)
    - `-s, --sandbox` - Run in Docker isolation
    - `-o, --output-format <text|json>` - Output format
-5. **IMPORTANT**: Append `2>/dev/null` to all gemini commands to suppress thinking tokens (stderr). Only show stderr if debugging is needed.
+5. **Important**: `gemini "prompt" -o json 2>/dev/null | jq -r '.response'` to suppress stderr noise and extract the json response, unless specified by the user.
 
 ### Critical Note
 YOLO mode does NOT prevent planning prompts. Use forceful language: "Apply now", "Start immediately", "Do this without asking for confirmation".
 
 ## Quick Reference
 
-| Use case | Mode | Key flags |
+| Use case | Mode | Command pattern |
 | --- | --- | --- |
-| Read-only analysis / review | read-only | `-o text 2>/dev/null` |
-| Web search | read-only | `-o text 2>/dev/null` |
-| Codebase architecture | read-only | `-o text 2>/dev/null` |
-| Apply local edits | write | `--yolo -o text 2>/dev/null` |
-| Sandboxed write | sandbox | `--yolo --sandbox -o text 2>/dev/null` |
-| Background long task | write | `--yolo -o text 2>&1 &` |
+| Read-only analysis | read-only | `gemini "..." -o json 2>/dev/null \| jq -r '.response'` |
+| Apply local edits | write | `gemini "..." --yolo -o json 2>/dev/null \| jq -r '.response'` |
+| Sandboxed write | sandbox | `gemini "..." --yolo --sandbox -o json 2>/dev/null \| jq -r '.response'` |
 
 ### Example Commands
 
 ```bash
-# Read-only code review (will prompt if attempting writes)
-gemini "Review src/ for bugs and security issues" -o text 2>/dev/null
+# Read-only
+gemini "Review src/ for bugs" -o json 2>/dev/null | jq -r '.response'
 
-# Read-only web search
-gemini "What are the latest React 19 features? Use Google Search." -o text 2>/dev/null
+# Write mode
+gemini "Fix bug in file.py. Apply now." --yolo -o json 2>/dev/null | jq -r '.response'
 
-# Read-only codebase analysis
-gemini "Use codebase_investigator to analyze this project" -o text 2>/dev/null
-
-# Write mode - code generation
-gemini "Create [description]. Start immediately." --yolo -o text 2>/dev/null
-
-# Write mode - bug fix
-gemini "Fix [issue] in [file]. Apply now." --yolo -o text 2>/dev/null
-
-# Sandboxed write mode (Docker isolation)
-gemini "Run tests and fix failures." --yolo --sandbox -o text 2>/dev/null
+# If redirection fails, wrap in bash -lc
+bash -lc 'gemini "prompt" -o json 2>/dev/null | jq -r ".response"'
 ```
 
 ## Following Up
 
-- Use session resume for multi-turn workflows: `echo "follow-up" | gemini -r latest -o text 2>/dev/null`
+- Resume: `echo "follow-up" | gemini -r latest -o json 2>/dev/null | jq -r '.response'`
 - List sessions: `gemini --list-sessions`
-- For long tasks, run in background and monitor with `TaskOutput`
 
 ## Error Handling
 
