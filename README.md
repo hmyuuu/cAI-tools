@@ -5,16 +5,52 @@
 - `agents/` - Agent profiles for specialized tasks (code review, API documentation, etc.)
 - `skills/` - Reusable skill definitions for Claude Code
 - `commands/` - Slash commands for Claude Code
+- `hooks-tool/` - Push notification hooks for Claude Code
+- `tools/pushover-notify/` - Pushover notification script
 
 ## Setup
 
-Create symlinks to use with Claude Code:
+### Auto Install
+
+```bash
+./install.sh
+```
+
+This will:
+- Symlink `agents/`, `skills/`, `commands/` to `~/.claude/`
+- Copy notification hooks to `~/bin/`
+- Prompt for Pushover credentials
+
+Then update `~/.claude/settings.json` with hooks config (see [hooks-tool/settings.json](hooks-tool/settings.json)) and restart Claude Code.
+
+### Auto Uninstall
+
+```bash
+./uninstall.sh
+```
+
+This will remove symlinks, hooks, and optionally Keychain credentials.
+
+### Manual Install
+
+Symlink agents, skills, and commands:
 
 ```bash
 ln -s /path/to/this/repo/agents ~/.claude/agents
 ln -s /path/to/this/repo/skills ~/.claude/skills
 ln -s /path/to/this/repo/commands ~/.claude/commands
 ```
+
+Or copy them:
+
+```bash
+mkdir -p ~/.claude/agents ~/.claude/skills ~/.claude/commands
+cp -r /path/to/this/repo/agents/* ~/.claude/agents/
+cp -r /path/to/this/repo/skills/* ~/.claude/skills/
+cp -r /path/to/this/repo/commands/* ~/.claude/commands/
+```
+
+For notification hooks, see [hooks-tool/README.md](hooks-tool/README.md).
 
 ## Bash Timeout Settings
 

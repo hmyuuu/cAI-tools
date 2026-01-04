@@ -62,9 +62,9 @@ def send_notification(title: str, message: str, priority: int = -1) -> None:
         po_notify = "po_notify"
 
     try:
-        # po_notify uses positional args: title message priority [url]
+        # po_notify uses: title message --priority N
         subprocess.run(
-            [str(po_notify), title, message, str(priority)],
+            [str(po_notify), title, message, "--priority", str(priority)],
             check=True,
             capture_output=True,
             timeout=10,
