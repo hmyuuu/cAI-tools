@@ -15,7 +15,7 @@ You must fix $ARGUMENTS using **codex**, **gemini-cli**, and an independent suba
    - **codex**: `echo "Analyze ""your description here"". Propose a fix plan with steps and tradeoffs." | codex exec --skip-git-repo-check --sandbox read-only - 2>/dev/null`
    - **gemini-cli**: `gemini "Analyze ""your description here"". Propose a fix plan with steps and tradeoffs." -o json 2>/dev/null | jq -r '.response'`
    - **subagent**: Launch an appropriate agent to analyze independently
-2. Compare the 3 plans, summarize tradeoffs, and ask me only the **minimum necessary** questions to choose the best fix (use `AskUserQuestion`).
+2. Compare the 3 plans, summarize tradeoffs, and ask me only the **necessary** questions to choose the best fix (use `AskUserQuestion`).
 3. Ultrathink: implement the fix (must not git commit) on your own.
 4. Ask **codex**, **gemini-cli**, and **subagent** to review the **uncommitted changes**.
    - **codex**: `(echo "Review the following uncommitted diff."; git diff) | codex exec --skip-git-repo-check --sandbox read-only - 2>/dev/null`
