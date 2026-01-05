@@ -30,7 +30,7 @@ import time
 from dataclasses import dataclass, field
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 
 # Default configuration - use ~/.claude/run for runtime files
@@ -186,9 +186,9 @@ class EscalationService:
     def __init__(self, socket_path: Path, log_path: Path):
         self.socket_path = socket_path
         self.log_path = log_path
-        self.server_socket: socket.socket | None = None
+        self.server_socket: Optional[socket.socket] = None
         self.running = False
-        self.scheduler: EscalationScheduler | None = None
+        self.scheduler: Optional[EscalationScheduler] = None
         # PID-tracked sessions: {session_id: {"pid": int, "registered_at": float}}
         self.sessions: dict[str, dict] = {}
         self.session_lock = threading.Lock()
@@ -311,7 +311,7 @@ class EscalationService:
         except Exception as e:
             self.logger.error(f"Notification error: {e}")
 
-    def _recv_exact(self, conn: socket.socket, n: int) -> bytes | None:
+    def _recv_exact(self, conn: socket.socket, n: int) -> Optional[bytes]:
         """Receive exactly n bytes, handling partial reads."""
         data = b""
         while len(data) < n:
@@ -321,7 +321,7 @@ class EscalationService:
             data += chunk
         return data
 
-    def _recv_message(self, conn: socket.socket) -> dict | None:
+    def _recv_message(self, conn: socket.socket) -> Optional[dict]:
         """Receive a length-prefixed JSON message."""
         try:
             # Read 4-byte length prefix (handle partial reads)
@@ -354,6 +354,7 @@ class EscalationService:
 
     def _handle_command(self, cmd: dict) -> dict:
         """Process a command and return response."""
+        assert self.scheduler is not None, "Scheduler not initialized"
         command = cmd.get("command", "")
 
         if command == "add":
@@ -430,7 +431,7 @@ class EscalationService:
         else:
             return {"status": "error", "message": f"unknown command: {command}"}
 
-    def _handle_client(self, conn: socket.socket, addr: Any) -> None:
+    def _handle_client(self, conn: socket.socket, _addr: Any) -> None:
         """Handle a single client connection."""
         try:
             conn.settimeout(30)

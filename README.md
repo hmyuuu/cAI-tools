@@ -4,6 +4,8 @@ A collection of Claude Code plugins containing custom agents, skills, commands, 
 
 Tested with macOS Claude Code v2.0.76+.
 
+The plugin is made conservative in context usage by keeping concise and precise writing.
+
 ## Plugins
 
 | Plugin | Description |
@@ -13,13 +15,22 @@ Tested with macOS Claude Code v2.0.76+.
 | **pushover** | Pushover notification hooks - get notified when tasks complete or permissions are needed |
 | **mac** | macOS integration - speak, send iMessages, emails, manage calendar, and display stickies |
 
+## Example:
+1. AI-skill: `Use codex and gemini-cli to review uncommitted changes.` `Check this with codex` `AI-skill:collob-fix Fix the bug showing here as ### Bug 3`
+2. mac: `after you finish, use mac to say "All done" and a brief summary of what you did.` ``Use imessage to send me (my email address/phone number) a message "Task complete" with the summary.` `Can you add this to my stikies?` `Use mac to generate today's calendar schedule with the information on my stikies.`. 
+
+
+## Known Issues:
+1. Pushover: Claude Code does not have a hook that fires specifically when a user rejects a permission prompt. The system relies on subsequent activity (like `Stop` or `UserPromptSubmit`) to cancel escalations. I believe this is a limitation of Claude Code's current hook system, and should be addressed in future versions. We now use a simple session-level tracking to manage escalations (a daemon that send notification by timing). The Pushover is now very annoying because of the 60s, but it is a good push for me. You can change it here [escalation service](plugins/pushover/scripts/service/escalation_service.py)
+2. mac: The `ical.sh` script reads all calendars but only writes to a calendar named "Agent". If your calendar contains sensitive information, be cautious when using this skill.
+3. All email/message/calendar features depend on the respective macOS apps being properly configured with accounts. First run of osascript may prompt for permissions. 
 
 ## Installation
 
 ### Add the Marketplace
 
 ```bash
-claude plugin marketplace add /path/to/my-agent-prompt
+claude plugin marketplace add /path/to/cAI-tools
 ```
 
 ### Install Plugins

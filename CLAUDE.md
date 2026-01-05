@@ -17,7 +17,7 @@ Use this tool to manage plugin versions across `marketplace.json`, `plugin.json`
 ## Directory Structure
 
 ```
-my-agent-prompt/
+cAI-tools/
 ├── .claude-plugin/
 │   └── marketplace.json      # Marketplace manifest
 ├── plugins/
