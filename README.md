@@ -1,7 +1,7 @@
 # cAI-tools
 A collection of Claude Code plugins containing custom agents, skills, commands, and notification hooks.
 
-Tested with macOS Claude Code v2.0.76+.
+Tested with **macOS** Claude Code v2.0.76+.
 
 The plugin is made conservative in context usage by keeping concise and precise writing.
 
@@ -15,15 +15,38 @@ The plugin is made conservative in context usage by keeping concise and precise 
 | **mac** | macOS integration - speak, send iMessages, emails, manage calendar, and display stickies |
 
 ## Example:
-1. AI-skill: `Use codex and gemini-cli to review uncommitted changes.` `Check this with codex` `AI-skill:collob-fix Fix the bug showing here as ### Bug 3`
-2. mac: `after you finish, use mac to say "All done" and a brief summary of what you did.` ``Use imessage to send me (my email address/phone number) a message "Task complete" with the summary.` `Can you add this to my stikies?` `Use mac to generate today's calendar schedule with the information on my stikies.`. 
+1. **AI-skill**: 
+```bash
+Use codex and gemini-cli to review uncommitted changes.
+```
+```bash
+Check this with codex
+```
+```bash
+AI-skill:collob-fix Fix the bug showing here as ### Bug 3
+```
+
+2. **mac**: 
+```bash 
+after you finish, use mac to say "All done" and a brief summary of what you did.
+``` 
+```bash 
+Use imessage to send me (my email address/phone number) a message "Task complete" with the summary.
+```
+```bash
+Can you add this to my stikies?
+```
+
+```bash
+Use mac to generate today's calendar schedule with the information on my stikies.
+```
 
 <img width="330" height="326" alt="macTools" src="https://github.com/user-attachments/assets/674ac8d8-d62a-4e5a-bd6c-584991634c36" />
 <img width="206" height="46" alt="Pushover" src="https://github.com/user-attachments/assets/e3965610-31f8-4aec-a36c-c94c2cf0aef2" />
 <img width="202" height="117" alt="Sticker" src="https://github.com/user-attachments/assets/d76ca525-757a-4768-835d-803cb5c7eca6" />
 
 ## Known Issues:
-1. Pushover: Claude Code does not have a hook that fires specifically when a user rejects a permission prompt. The system relies on subsequent activity (like `Stop` or `UserPromptSubmit`) to cancel escalations. I believe this is a limitation of Claude Code's current hook system, and should be addressed in future versions. We now use a simple session-level tracking to manage escalations (a daemon that send notification by timing). The Pushover is now very annoying because of the 60s, but it is a good push for me. You can change it here [escalation service](plugins/pushover/scripts/service/escalation_service.py)
+1. Pushover: Claude Code does not have a hook that fires specifically when a user rejects a permission prompt. The system relies on subsequent activity (like `Stop` or `UserPromptSubmit`) to cancel escalations(a daemon that send notification by timing). I believe this is a limitation of Claude Code's current hook system, and should be addressed in future versions. We now use a simple session-level tracking to manage escalations. The Pushover is now very annoying because of the 60s, but it is a good push for me. You can change it here [escalation service](plugins/pushover/scripts/service/escalation_service.py)
 2. mac: The `ical.sh` script reads all calendars but only writes to a calendar named "Agent". If your calendar contains sensitive information, be cautious when using this skill.
 3. All email/message/calendar features depend on the respective macOS apps being properly configured with accounts. First run of osascript may prompt for permissions. 
 
