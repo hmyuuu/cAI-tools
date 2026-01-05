@@ -7,6 +7,21 @@ Push notifications for Claude Code via Pushover.
 - **Permission Escalation**: Get notified when Claude is waiting for permission approval
 - **Task Completion**: Low-priority notification when Claude finishes a task
 - **Session Management**: Automatic service lifecycle tied to Claude sessions
+- **On-Demand Notifications**: Send push notifications via the `notification` skill
+
+## Notification Skill
+
+Send push notifications on demand:
+
+```bash
+# Basic notification
+"Send me a notification when you're done"
+
+# With priority
+"Notify me urgently if the build fails"
+```
+
+Priority levels: -2 (silent), -1 (quiet), 0 (normal), 1 (high), 2 (emergency)
 
 ## Escalation System
 
@@ -78,6 +93,10 @@ pushover/
 │       ├── escalation_service.py  # Background escalation manager
 │       ├── escalation_client.py   # Client library for service communication
 │       └── escalation_ctl.py      # CLI for manual control
+├── skills/
+│   └── notification/
+│       ├── SKILL.md               # Skill definition
+│       └── scripts/notify.sh      # Notification script
 └── tools/
     └── pushover-notify/
         └── po_notify.py           # Pushover API wrapper
