@@ -1,27 +1,71 @@
-# My Agent Prompts
-The following has been tested to work with MacOS Claude Code (v2.0.76+).
+# cAI - Claude Code Plugin
 
-The repo contains some of my favorite agent prompts, skills, commands, and hooks for Claude Code.
+A Claude Code plugin containing custom agents, skills, commands, and notification hooks.
 
-Agents: lightly modified versions of those shared by Anthropic, as well as some custom ones.
+Tested with macOS Claude Code v2.0.76+.
 
-Skills: modifed version from https://github.com/skills-directory/skill-codex, gemini-cli, and mac skills.
+The intended use is for my own personal and project use, but feel free to use or modify it as needed.
 
-Commands: custom slash commands for colloborations of claude subagent, codex and gemini-cli. 
+## Contents
 
-Hooks: pushover integration for push notifications.
+- **Agents**: Specialized task agents (code review, API documentation, QCodes, quantum devices, etc.)
+- **Skills**: Codex CLI, Gemini CLI, and macOS integration skills
+- **Commands**: Collaborative slash commands for multi-agent workflows
+- **Hooks**: Pushover push notifications for permission prompts and task completion
 
 ## Directory Structure
 
-- `agents/` - Agent profiles for specialized tasks (code review, API documentation, etc.)
-- `skills/` - Reusable skill definitions for Claude Code
-- `commands/` - Slash commands for Claude Code
-- `hooks-tool/` - Push notification hooks for Claude Code
-- `tools/pushover-notify/` - Pushover notification script
+```
+cAI/
+├── .claude-plugin/
+│   └── plugin.json           # Plugin manifest
+├── agents/                   # Agent profiles
+├── commands/                 # Slash commands (invoked as /cAI:command)
+├── skills/                   # Skill definitions
+│   ├── codex/
+│   ├── gemini-cli/
+│   └── mac/
+├── hooks/
+│   └── hooks.json            # Hook configuration
+├── scripts/
+│   ├── hooks/                # Hook handlers
+│   └── service/              # Escalation service
+├── tools/
+│   └── pushover-notify/      # Notification script
+└── setup-service.sh          # One-time Pushover setup
+```
+
+## Installation
+
+```bash
+# Install to user scope (personal, all projects)
+claude plugin install /path/to/cAI
+
+# Or install to project scope (shared via git)
+claude plugin install /path/to/cAI --scope project
+```
+
+### Pushover Setup (Optional)
+
+For push notifications, run the one-time setup:
+
+```bash
+./setup-service.sh
+```
+
+This saves your Pushover credentials to macOS Keychain.
+
+## Uninstallation
+
+```bash
+claude plugin uninstall cAI
+```
+
+This only removes this plugin - other plugins and settings remain intact.
 
 ## Mac Skill
 
-The `mac` skill enables Claude to interact with macOS native apps via osascript:
+The `mac` skill enables Claude to interact with macOS native apps:
 
 | Feature | Script | Description |
 |---------|--------|-------------|
@@ -31,49 +75,17 @@ The `mac` skill enables Claude to interact with macOS native apps via osascript:
 | Calendar | `ical.sh` | List/add events (reads all, writes to "Agent" calendar) |
 | Stickies | `iStickies.sh` | Display notes with markdown support |
 
-## Setup
+## Notification Hooks
 
-### Auto Install
+The plugin includes hooks for Pushover notifications:
 
-```bash
-./install.sh
-```
-
-This will:
-- Symlink `agents/`, `skills/`, `commands/` to `~/.claude/`
-- Copy notification hooks to `~/bin/`
-- Prompt for Pushover credentials
-
-Then update `~/.claude/settings.json` with hooks config (see [hooks-tool/settings.json](hooks-tool/settings.json)) and restart Claude Code.
-
-### Auto Uninstall
-
-```bash
-./uninstall.sh
-```
-
-This will remove symlinks, hooks, and optionally Keychain credentials.
-
-### Manual Install
-
-Symlink agents, skills, and commands:
-
-```bash
-ln -s /path/to/this/repo/agents ~/.claude/agents
-ln -s /path/to/this/repo/skills ~/.claude/skills
-ln -s /path/to/this/repo/commands ~/.claude/commands
-```
-
-Or copy them:
-
-```bash
-mkdir -p ~/.claude/agents ~/.claude/skills ~/.claude/commands
-cp -r /path/to/this/repo/agents/* ~/.claude/agents/
-cp -r /path/to/this/repo/skills/* ~/.claude/skills/
-cp -r /path/to/this/repo/commands/* ~/.claude/commands/
-```
-
-For notification hooks, see [hooks-tool/README.md](hooks-tool/README.md).
+| Hook | Trigger | Notification |
+|------|---------|--------------|
+| SessionStart | Claude session begins | Starts escalation service |
+| Notification | Permission prompt | Schedules escalation (1min, 1hr) |
+| PostToolUse | Tool completes | Cancels pending escalation |
+| Stop | Task completes | Low-priority "done" notification |
+| SessionEnd | Claude session ends | Cleans up service |
 
 ## Bash Timeout Settings
 

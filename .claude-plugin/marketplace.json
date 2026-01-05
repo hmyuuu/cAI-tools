@@ -1,0 +1,21 @@
+{
+  "name": "caidish-tools",
+  "owner": {
+    "name": "caidish"
+  },
+  "metadata": {
+    "description": "Custom Claude Code tools and hooks",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "cAI",
+      "source": "./plugins/cAI",
+      "description": "Pushover notification hooks for Claude Code",
+      "version": "1.0.0",
+      "author": {
+        "name": "caidish"
+      }
+    }
+  ]
+}

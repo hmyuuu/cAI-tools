@@ -1,0 +1,8 @@
+{
+  "name": "cAI",
+  "version": "1.0.0",
+  "description": "Custom agents, skills, and notification hooks for Claude Code",
+  "author": {
+    "name": "caidish"
+  }
+}
