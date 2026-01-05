@@ -5,19 +5,31 @@ The repo contains some of my favorite agent prompts, skills, commands, and hooks
 
 Agents: lightly modified versions of those shared by Anthropic, as well as some custom ones.
 
-Skills: modifed version from https://github.com/skills-directory/skill-codex, and gemini-cli skills. 
+Skills: modifed version from https://github.com/skills-directory/skill-codex, gemini-cli, and mac skills.
 
 Commands: custom slash commands for colloborations of claude subagent, codex and gemini-cli. 
 
 Hooks: pushover integration for push notifications.
 
-## Agents and Skills
+## Directory Structure
 
 - `agents/` - Agent profiles for specialized tasks (code review, API documentation, etc.)
 - `skills/` - Reusable skill definitions for Claude Code
 - `commands/` - Slash commands for Claude Code
 - `hooks-tool/` - Push notification hooks for Claude Code
 - `tools/pushover-notify/` - Pushover notification script
+
+## Mac Skill
+
+The `mac` skill enables Claude to interact with macOS native apps via osascript:
+
+| Feature | Script | Description |
+|---------|--------|-------------|
+| Text-to-Speech | `say` | Speak messages aloud |
+| iMessage | `imessage.sh` | Send iMessages |
+| Email | `imail.sh` | Send emails via Mail.app |
+| Calendar | `ical.sh` | List/add events (reads all, writes to "Agent" calendar) |
+| Stickies | `iStickies.sh` | Display notes with markdown support |
 
 ## Setup
 
