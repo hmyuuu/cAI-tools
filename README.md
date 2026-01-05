@@ -15,8 +15,8 @@ The plugin is made conservative in context usage by keeping concise and precise 
 | **mac** | macOS integration - speak, send iMessages, emails, manage calendar, and display stickies |
 
 ## Example:
-1. AI-skill: `Use codex and gemini-cli to review uncommitted changes.` `Check this with codex` `AI-skill:collob-fix Fix the bug showing here as ### Bug 3`
-2. mac: `after you finish, use mac to say "All done" and a brief summary of what you did.` ``Use imessage to send me (my email address/phone number) a message "Task complete" with the summary.` `Can you add this to my stikies?` `Use mac to generate today's calendar schedule with the information on my stikies.`. 
+1. AI-skill: `Use codex and gemini-cli to review uncommitted changes.` `Check this with codex` `AI-skill:collab-fix Fix the bug showing here as ### Bug 3`
+2. mac: `after you finish, use mac to say "All done" and a brief summary of what you did.` ``Use imessage to send me (my email address/phone number) a message "Task complete" with the summary.` `Can you add this to my stickies?` `Use mac to generate today's calendar schedule with the information on my stickies.`. 
 
 <img width="330" height="326" alt="macTools" src="https://github.com/user-attachments/assets/674ac8d8-d62a-4e5a-bd6c-584991634c36" />
 <img width="206" height="46" alt="Pushover" src="https://github.com/user-attachments/assets/e3965610-31f8-4aec-a36c-c94c2cf0aef2" />
@@ -168,6 +168,6 @@ Examples:
 
 ### AI Workflow
 
-If changes are makde to a plugin
+If changes are made to a plugin
 1. Run `./tools/plugin-version.sh bump <plugin> patch` to increment version
 2. Run `./tools/plugin-version.sh status` to see status and update Claude
