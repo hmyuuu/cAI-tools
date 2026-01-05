@@ -39,7 +39,7 @@
       "name": "mac",
       "source": "./plugins/mac",
       "description": "macOS integration - speak, send iMessages, emails, manage calendar, and display stickies",
-      "version": "1.0.0",
+      "version": "1.0.3",
       "author": {
         "name": "caidish"
       }

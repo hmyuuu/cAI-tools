@@ -39,7 +39,14 @@ my-agent-prompt/
 │   │       └── pushover-notify/
 │   └── mac/
 │       ├── .claude-plugin/plugin.json
-│       └── skills/mac/
+│       └── skills/
+│           ├── calendar/
+│           ├── mail/
+│           ├── message/
+│           └── stickies/
+├── tools/
+│   ├── plugin-version.sh     # Version control TUI
+│   └── update-plugins.sh     # Batch update script
 ├── setup-service.sh          # One-time Pushover setup
 └── README.md
 ```
@@ -154,3 +161,39 @@ Add to `~/.claude/settings.json` to extend bash timeouts:
 |---------|-------|-------------|
 | `BASH_DEFAULT_TIMEOUT_MS` | 600000 | Default timeout: 10 min |
 | `BASH_MAX_TIMEOUT_MS` | 3600000 | Max timeout: 1 hour |
+
+## Version Control
+
+A TUI tool for managing plugin versions across `marketplace.json`, `plugin.json`, and Claude CLI.
+
+### Setup for human
+
+Install [gum](https://github.com/charmbracelet/gum) for the best TUI experience (optional):
+
+```bash
+brew install gum
+```
+
+Interactive TUI mode:
+```bash
+./tools/plugin-version.sh
+```
+
+### AI Usage
+Examples:
+```bash
+# CLI commands
+./tools/plugin-version.sh status              # View version status
+./tools/plugin-version.sh update              # Update plugins in Claude
+./tools/plugin-version.sh update mac          # Update specific plugin
+./tools/plugin-version.sh bump mac patch      # Bump version (patch/minor/major)
+./tools/plugin-version.sh bump-all minor      # Bump all plugins
+./tools/plugin-version.sh set mac 2.0.0       # Set specific version
+./tools/plugin-version.sh sync                # Sync plugin.json to marketplace.json
+```
+
+### AI Workflow
+
+If changes are makde to a plugin
+1. Run `./tools/plugin-version.sh bump <plugin> patch` to increment version
+2. Run `./tools/plugin-version.sh status` to see status and update Claude
