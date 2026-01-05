@@ -4,14 +4,35 @@ Escalation Control - CLI for managing the escalation service.
 
 Usage:
     escalation_ctl start              Start service if not running
-    escalation_ctl stop               Stop the service
-    escalation_ctl status             Show pending escalations
+    escalation_ctl stop               Force stop the service
+    escalation_ctl status             Show sessions (with PIDs) and pending escalations
+
     escalation_ctl add <id> <msg>     Add an escalation manually
     escalation_ctl cancel <id>        Cancel an escalation
+
+    escalation_ctl register [--session-id ID] [--pid PID]
+                                      Register a session with PID tracking
+    escalation_ctl unregister [--session-id ID]
+                                      Unregister a session
+
+Examples:
+    # Simulate full Claude Code flow with PID tracking
+    escalation_ctl start
+    escalation_ctl register --session-id my-session --pid $$
+    escalation_ctl add my-session "Waiting for permission"
+    escalation_ctl status
+    escalation_ctl cancel my-session
+    escalation_ctl unregister --session-id my-session
+
+    # Test PID auto-cleanup (register with non-existent PID)
+    escalation_ctl register --pid 99999
+    # Wait 60s, then check status - session should be auto-removed
+
+    # Add escalation with custom delays (5s, 30s)
+    escalation_ctl add test "Test message" --delays 5,30
 """
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -21,7 +42,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from escalation_client import EscalationClient
 
 
-def cmd_start(client: EscalationClient, args: argparse.Namespace) -> int:
+def cmd_start(client: EscalationClient, _args: argparse.Namespace) -> int:
     """Start the escalation service."""
     if client.is_running():
         print("Service is already running")
@@ -36,7 +57,7 @@ def cmd_start(client: EscalationClient, args: argparse.Namespace) -> int:
         return 1
 
 
-def cmd_stop(client: EscalationClient, args: argparse.Namespace) -> int:
+def cmd_stop(client: EscalationClient, _args: argparse.Namespace) -> int:
     """Stop the escalation service."""
     if not client.is_running():
         print("Service is not running")
@@ -52,7 +73,7 @@ def cmd_stop(client: EscalationClient, args: argparse.Namespace) -> int:
         return 1
 
 
-def cmd_status(client: EscalationClient, args: argparse.Namespace) -> int:
+def cmd_status(client: EscalationClient, _args: argparse.Namespace) -> int:
     """Show service status and pending escalations."""
     if not client.is_running():
         print("Service is not running")
@@ -63,11 +84,21 @@ def cmd_status(client: EscalationClient, args: argparse.Namespace) -> int:
         print("Failed to get status", file=sys.stderr)
         return 1
 
+    sessions = result.get("sessions", {})
     pending = result.get("pending", [])
+
+    print(f"Service is running. {len(sessions)} session(s):")
+    if sessions:
+        for sid, info in sessions.items():
+            pid = info.get("pid", "?")
+            age = info.get("age", 0)
+            print(f"  {sid[:16]}{'...' if len(sid) > 16 else ''} pid={pid} age={age:.0f}s")
+    print()
+
     if not pending:
-        print("Service is running. No pending escalations.")
+        print("No pending escalations.")
     else:
-        print(f"Service is running. {len(pending)} pending escalation(s):")
+        print(f"{len(pending)} pending escalation(s):")
         print()
         for item in pending:
             eid = item.get("escalation_id", "unknown")
@@ -81,6 +112,43 @@ def cmd_status(client: EscalationClient, args: argparse.Namespace) -> int:
             print()
 
     return 0
+
+
+def cmd_register(client: EscalationClient, args: argparse.Namespace) -> int:
+    """Register a session with optional PID tracking."""
+    if not client.start_service_if_needed():
+        print("Failed to start service", file=sys.stderr)
+        return 1
+
+    result = client.register_session(session_id=args.session_id, pid=args.pid)
+    if result and result.get("status") == "ok":
+        count = result.get("session_count", 1)
+        sid = result.get("session_id", "unknown")
+        print(f"Session registered: {sid} (pid={args.pid}, count={count})")
+        return 0
+    else:
+        print("Failed to register session", file=sys.stderr)
+        return 1
+
+
+def cmd_unregister(client: EscalationClient, args: argparse.Namespace) -> int:
+    """Unregister a session (decrement ref count)."""
+    if not client.is_running():
+        print("Service is not running")
+        return 1
+
+    result = client.unregister_session(session_id=args.session_id)
+    if result and result.get("status") == "ok":
+        count = result.get("session_count", 0)
+        sid = result.get("session_id", "unknown")
+        if result.get("shutting_down"):
+            print(f"Session unregistered: {sid}. Last session, service shutting down.")
+        else:
+            print(f"Session unregistered: {sid} (count={count})")
+        return 0
+    else:
+        print("Failed to unregister session", file=sys.stderr)
+        return 1
 
 
 def cmd_add(client: EscalationClient, args: argparse.Namespace) -> int:
@@ -150,6 +218,15 @@ def main():
     cancel_parser = subparsers.add_parser("cancel", help="Cancel an escalation")
     cancel_parser.add_argument("escalation_id", help="ID of the escalation to cancel")
 
+    # register command
+    register_parser = subparsers.add_parser("register", help="Register a session with PID tracking")
+    register_parser.add_argument("--session-id", dest="session_id", help="Session ID (default: auto-generated)")
+    register_parser.add_argument("--pid", type=int, help="PID to track (default: current shell PID)")
+
+    # unregister command
+    unregister_parser = subparsers.add_parser("unregister", help="Unregister a session")
+    unregister_parser.add_argument("--session-id", dest="session_id", help="Session ID to unregister (default: oldest)")
+
     args = parser.parse_args()
     client = EscalationClient()
 
@@ -159,6 +236,8 @@ def main():
         "status": cmd_status,
         "add": cmd_add,
         "cancel": cmd_cancel,
+        "register": cmd_register,
+        "unregister": cmd_unregister,
     }
 
     return commands[args.command](client, args)

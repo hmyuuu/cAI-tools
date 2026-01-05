@@ -4,6 +4,7 @@ Claude Code Stop Hook - Task Completion Notification
 
 Sends a low-priority Pushover notification when Claude finishes a task.
 Extracts a summary from the conversation transcript.
+Also cancels any pending escalation timers (handles permission rejection case).
 
 Receives via stdin:
 {
@@ -15,10 +16,14 @@ Receives via stdin:
 """
 
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from service import cancel_escalation, get_client
 
 
 def get_last_assistant_text(transcript_path: str, max_words: int = 100) -> str:
@@ -87,6 +92,15 @@ def main():
         hook_input = json.loads(stdin_data) if stdin_data.strip() else {}
     except json.JSONDecodeError:
         hook_input = {}
+
+    # Cancel any pending escalation (handles permission rejection case)
+    session_id = hook_input.get("session_id", "")
+    if session_id:
+        client = get_client()
+        if client.is_running():
+            result = cancel_escalation(session_id)
+            if result and result.get("cancelled"):
+                print(f"Cancelled escalation on Stop", file=sys.stderr)
 
     transcript_path = hook_input.get("transcript_path", "")
 

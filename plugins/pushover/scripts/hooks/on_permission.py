@@ -48,13 +48,13 @@ def main():
     if notification_type != "permission_prompt":
         return
 
-    # Extract session and tool info
+    # Extract session info
     session_id = hook_input.get("session_id", "unknown")
-    tool_use_id = hook_input.get("tool_use_id", "")
     message = hook_input.get("message", "Awaiting permission approval")
 
-    # Build escalation ID that on_post_tool.py can use to cancel
-    escalation_id = f"{session_id}:{tool_use_id}" if tool_use_id else session_id
+    # Use session_id as escalation key for session-level tracking
+    # This allows any subsequent hook (accept/reject/other activity) to cancel
+    escalation_id = session_id
 
     # Ensure service is running (fallback if SessionStart didn't fire)
     start_service()

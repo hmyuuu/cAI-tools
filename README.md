@@ -13,43 +13,6 @@ Tested with macOS Claude Code v2.0.76+.
 | **pushover** | Pushover notification hooks - get notified when tasks complete or permissions are needed |
 | **mac** | macOS integration - speak, send iMessages, emails, manage calendar, and display stickies |
 
-## Directory Structure
-
-```
-my-agent-prompt/
-├── .claude-plugin/
-│   └── marketplace.json      # Marketplace manifest
-├── plugins/
-│   ├── awesome-agent/
-│   │   ├── .claude-plugin/plugin.json
-│   │   └── agents/           # 11 subagents
-│   ├── AI-skill/
-│   │   ├── .claude-plugin/plugin.json
-│   │   ├── commands/         # collab-fix.md
-│   │   └── skills/
-│   │       ├── codex/
-│   │       └── gemini-cli/
-│   ├── pushover/
-│   │   ├── .claude-plugin/plugin.json
-│   │   ├── hooks/hooks.json
-│   │   ├── scripts/
-│   │   │   ├── hooks/        # Hook handlers
-│   │   │   └── service/      # Escalation service
-│   │   └── tools/
-│   │       └── pushover-notify/
-│   └── mac/
-│       ├── .claude-plugin/plugin.json
-│       └── skills/
-│           ├── calendar/
-│           ├── mail/
-│           ├── message/
-│           └── stickies/
-├── tools/
-│   ├── plugin-version.sh     # Version control TUI
-│   └── update-plugins.sh     # Batch update script
-├── setup-service.sh          # One-time Pushover setup
-└── README.md
-```
 
 ## Installation
 

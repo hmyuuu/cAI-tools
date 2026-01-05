@@ -38,6 +38,7 @@ DEFAULT_SOCKET = Path("~/.claude/run/escalation.sock").expanduser()
 DEFAULT_LOG = Path("~/.claude/logs/escalation.log").expanduser()
 DEFAULT_DELAYS = [60, 3600]  # 1 min, 1 hour
 PRIORITIES = {60: 0, 3600: 2}  # delay -> priority mapping
+PID_CHECK_INTERVAL = 60  # Check for dead PIDs every 60 seconds
 # po_notify relative to plugin root (scripts/service -> tools/pushover-notify)
 PO_NOTIFY_SCRIPT = Path(__file__).parent.parent.parent / "tools" / "pushover-notify" / "po_notify.py"
 
@@ -188,7 +189,8 @@ class EscalationService:
         self.server_socket: socket.socket | None = None
         self.running = False
         self.scheduler: EscalationScheduler | None = None
-        self.session_count = 0  # Ref counting for multiple sessions
+        # PID-tracked sessions: {session_id: {"pid": int, "registered_at": float}}
+        self.sessions: dict[str, dict] = {}
         self.session_lock = threading.Lock()
         self._setup_logging()
 
@@ -215,6 +217,43 @@ class EscalationService:
             "[%(levelname)s] %(message)s"
         ))
         self.logger.addHandler(stderr_handler)
+
+    def _is_pid_alive(self, pid: int) -> bool:
+        """Check if a PID is still running."""
+        try:
+            os.kill(pid, 0)  # Signal 0 = check existence without killing
+            return True
+        except OSError:
+            return False
+
+    def _cleanup_dead_sessions(self) -> None:
+        """Remove sessions whose PIDs are no longer alive."""
+        with self.session_lock:
+            dead = []
+            for session_id, info in self.sessions.items():
+                pid = info.get("pid")
+                if pid and not self._is_pid_alive(pid):
+                    dead.append((session_id, pid))
+
+            for session_id, pid in dead:
+                del self.sessions[session_id]
+                self.logger.info(f"Auto-unregistered dead session: {session_id} (pid={pid})")
+
+            if not self.sessions and dead:
+                self.logger.info("No sessions remaining after cleanup, shutting down")
+                self.running = False
+
+    def _start_pid_checker(self) -> None:
+        """Start background thread to check for dead PIDs."""
+        def checker():
+            while self.running:
+                time.sleep(PID_CHECK_INTERVAL)
+                if self.running:
+                    self._cleanup_dead_sessions()
+
+        thread = threading.Thread(target=checker, daemon=True)
+        thread.start()
+        self.logger.info(f"PID checker started (interval={PID_CHECK_INTERVAL}s)")
 
     def _cleanup_socket(self) -> None:
         """Remove stale socket file if it exists."""
@@ -335,28 +374,52 @@ class EscalationService:
         elif command == "status":
             pending = self.scheduler.status()
             with self.session_lock:
-                session_count = self.session_count
-            return {"status": "ok", "pending": pending, "session_count": session_count}
+                sessions_info = {
+                    sid: {
+                        "pid": info.get("pid"),
+                        "registered_at": info.get("registered_at"),
+                        "age": time.time() - info.get("registered_at", time.time()),
+                    }
+                    for sid, info in self.sessions.items()
+                }
+            return {
+                "status": "ok",
+                "pending": pending,
+                "session_count": len(sessions_info),
+                "sessions": sessions_info,
+            }
 
         elif command == "register_session":
+            session_id = cmd.get("session_id", f"session-{time.time()}")
+            pid = cmd.get("pid")
             with self.session_lock:
-                self.session_count += 1
-                count = self.session_count
-            self.logger.info(f"Session registered (count={count})")
-            return {"status": "ok", "session_count": count}
+                self.sessions[session_id] = {
+                    "pid": pid,
+                    "registered_at": time.time(),
+                }
+                count = len(self.sessions)
+            self.logger.info(f"Session registered: {session_id} (pid={pid}, count={count})")
+            return {"status": "ok", "session_id": session_id, "session_count": count}
 
         elif command == "unregister_session":
+            session_id = cmd.get("session_id")
             should_shutdown = False
             with self.session_lock:
-                self.session_count = max(0, self.session_count - 1)
-                count = self.session_count
+                if session_id and session_id in self.sessions:
+                    del self.sessions[session_id]
+                elif self.sessions:
+                    # Fallback: remove oldest session if no ID specified
+                    oldest = min(self.sessions.items(), key=lambda x: x[1].get("registered_at", 0))
+                    del self.sessions[oldest[0]]
+                    session_id = oldest[0]
+                count = len(self.sessions)
                 if count == 0:
                     should_shutdown = True
-            self.logger.info(f"Session unregistered (count={count})")
+            self.logger.info(f"Session unregistered: {session_id} (count={count})")
             if should_shutdown:
                 self.logger.info("No more sessions, shutting down")
                 self.running = False
-            return {"status": "ok", "session_count": count, "shutting_down": should_shutdown}
+            return {"status": "ok", "session_id": session_id, "session_count": count, "shutting_down": should_shutdown}
 
         elif command == "shutdown":
             # Force shutdown regardless of session count
@@ -406,8 +469,11 @@ class EscalationService:
         self.running = True
         self.logger.info(f"Escalation service started on {self.socket_path}")
 
+        # Start PID checker thread
+        self._start_pid_checker()
+
         # Handle signals
-        def signal_handler(signum, frame):
+        def signal_handler(signum, _frame):
             self.logger.info(f"Received signal {signum}")
             self.running = False
 

@@ -200,21 +200,31 @@ class EscalationClient:
 
         return self.send_command(sock, {"command": "shutdown"})
 
-    def register_session(self) -> dict | None:
-        """Register a new session (increment ref count)."""
+    def register_session(self, session_id: str | None = None, pid: int | None = None) -> dict | None:
+        """Register a new session with optional PID for tracking."""
         sock = self.connect()
         if not sock:
             return None
 
-        return self.send_command(sock, {"command": "register_session"})
+        cmd = {"command": "register_session"}
+        if session_id:
+            cmd["session_id"] = session_id
+        if pid:
+            cmd["pid"] = pid
 
-    def unregister_session(self) -> dict | None:
+        return self.send_command(sock, cmd)
+
+    def unregister_session(self, session_id: str | None = None) -> dict | None:
         """Unregister a session (decrement ref count, may shutdown if 0)."""
         sock = self.connect()
         if not sock:
             return None
 
-        return self.send_command(sock, {"command": "unregister_session"})
+        cmd = {"command": "unregister_session"}
+        if session_id:
+            cmd["session_id"] = session_id
+
+        return self.send_command(sock, cmd)
 
 
 # Convenience functions for simple usage
@@ -254,11 +264,11 @@ def get_status() -> dict | None:
     return get_client().get_status()
 
 
-def register_session() -> dict | None:
+def register_session(session_id: str | None = None, pid: int | None = None) -> dict | None:
     """Register a session (convenience function)."""
-    return get_client().register_session()
+    return get_client().register_session(session_id=session_id, pid=pid)
 
 
-def unregister_session() -> dict | None:
+def unregister_session(session_id: str | None = None) -> dict | None:
     """Unregister a session (convenience function)."""
-    return get_client().unregister_session()
+    return get_client().unregister_session(session_id=session_id)

@@ -27,11 +27,12 @@ def main():
     except json.JSONDecodeError:
         hook_input = {}
 
+    session_id = hook_input.get("session_id", "")
     client = get_client()
 
     # Unregister session (service will shutdown if this was the last session)
     if client.is_running():
-        result = unregister_session()
+        result = unregister_session(session_id=session_id)
         if result and result.get("status") == "ok":
             count = result.get("session_count", 0)
             if result.get("shutting_down"):
