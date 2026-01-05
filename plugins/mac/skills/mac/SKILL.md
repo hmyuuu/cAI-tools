@@ -15,14 +15,14 @@ Constraint: keep under 50 words, be concise
 ## Send iMessage
 
 ```bash
-skills/mac/scripts/imessage.sh "<recipient>" "<message>"
+scripts/imessage.sh "<recipient>" "<message>"
 ```
 Constraint: Use `AskUserQuestion` to confirm with the user.
 
 ## Send Email
 
 ```bash
-skills/mac/scripts/imail.sh "<recipient>" "<subject>" "<body>"
+scripts/imail.sh "<recipient>" "<subject>" "<body>"
 ```
 Constraint: Use `AskUserQuestion` to confirm with the user.
 
@@ -31,10 +31,10 @@ Constraint: Use `AskUserQuestion` to confirm with the user.
 Reads all calendars, writes only to "Agent" calendar.
 
 ```bash
-skills/mac/scripts/ical.sh list                              # today's events
-skills/mac/scripts/ical.sh add "<title>" "<start>" "<end>" "[notes]"
-skills/mac/scripts/ical.sh calendars                         # list calendars
-skills/mac/scripts/ical.sh ensure                            # create Agent calendar
+scripts/ical.sh list                              # today's events
+scripts/ical.sh add "<title>" "<start>" "<end>" "[notes]"
+scripts/ical.sh calendars                         # list calendars
+scripts/ical.sh ensure                            # create Agent calendar
 ```
 - Date formats: `"2026-01-05 14:00"`, `"today 14:00"`, `"tomorrow 10:30"`
 
@@ -45,7 +45,7 @@ Constraint: Use `AskUserQuestion` to confirm before adding events.
 Display content in a sticky note on screen:
 
 ```bash
-skills/mac/scripts/iStickies.sh "<content>"
+scripts/iStickies.sh "<content>"
 ```
 
 Supports markdown formatting:

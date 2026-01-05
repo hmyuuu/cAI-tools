@@ -33,11 +33,13 @@ from pathlib import Path
 from typing import Any
 
 
-# Default configuration
-DEFAULT_SOCKET = Path("~/bin/run/escalation.sock").expanduser()
+# Default configuration - use ~/.claude/run for runtime files
+DEFAULT_SOCKET = Path("~/.claude/run/escalation.sock").expanduser()
 DEFAULT_LOG = Path("~/.claude/logs/escalation.log").expanduser()
 DEFAULT_DELAYS = [60, 3600]  # 1 min, 1 hour
 PRIORITIES = {60: 0, 3600: 2}  # delay -> priority mapping
+# po_notify relative to plugin root (scripts/service -> tools/pushover-notify)
+PO_NOTIFY_SCRIPT = Path(__file__).parent.parent.parent / "tools" / "pushover-notify" / "po_notify.py"
 
 
 @dataclass(order=True)
@@ -245,9 +247,7 @@ class EscalationService:
 
     def _send_notification(self, escalation_id: str, message: str, priority: int) -> None:
         """Send notification via po_notify."""
-        po_notify = Path("~/bin/po_notify").expanduser()
-        if not po_notify.exists():
-            po_notify = Path("po_notify")
+        po_notify = PO_NOTIFY_SCRIPT
 
         title = "Claude Permission" if priority < 2 else "Claude Permission (1hr)"
 

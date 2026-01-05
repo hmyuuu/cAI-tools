@@ -1,17 +1,44 @@
 {
-  "name": "caidish-tools",
+  "name": "cAI-tools",
   "owner": {
     "name": "caidish"
   },
   "metadata": {
-    "description": "Custom Claude Code tools and hooks",
+    "description": "Custom Claude Code tools, agents, skills, and hooks",
     "pluginRoot": "./plugins"
   },
   "plugins": [
     {
-      "name": "cAI",
-      "source": "./plugins/cAI",
-      "description": "Pushover notification hooks for Claude Code",
+      "name": "awesome-agent",
+      "source": "./plugins/awesome-agent",
+      "description": "Collection of useful prompted subagents for code review, API docs, QA, and more",
+      "version": "1.0.0",
+      "author": {
+        "name": "caidish"
+      }
+    },
+    {
+      "name": "AI-skill",
+      "source": "./plugins/AI-skill",
+      "description": "Skills for interacting with other AI tools - Codex, Gemini CLI, and collaboration fixes",
+      "version": "1.0.0",
+      "author": {
+        "name": "caidish"
+      }
+    },
+    {
+      "name": "pushover",
+      "source": "./plugins/pushover",
+      "description": "Pushover notification hooks - get notified when tasks complete or permissions are needed",
+      "version": "1.0.0",
+      "author": {
+        "name": "caidish"
+      }
+    },
+    {
+      "name": "mac",
+      "source": "./plugins/mac",
+      "description": "macOS integration - speak, send iMessages, emails, manage calendar, and display stickies",
       "version": "1.0.0",
       "author": {
         "name": "caidish"

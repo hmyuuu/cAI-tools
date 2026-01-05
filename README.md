@@ -1,83 +1,111 @@
-# cAI - Claude Code Plugin
+# cAI-tools - Claude Code Plugin Marketplace
 
-A Claude Code plugin containing custom agents, skills, commands, and notification hooks.
+A collection of Claude Code plugins containing custom agents, skills, commands, and notification hooks.
 
 Tested with macOS Claude Code v2.0.76+.
 
-The intended use is for my own personal and project use, but feel free to use or modify it as needed.
+## Plugins
 
-## Contents
-
-- **Agents**: Specialized task agents (code review, API documentation, QCodes, quantum devices, etc.)
-- **Skills**: Codex CLI, Gemini CLI, and macOS integration skills
-- **Commands**: Collaborative slash commands for multi-agent workflows
-- **Hooks**: Pushover push notifications for permission prompts and task completion
+| Plugin | Description |
+|--------|-------------|
+| **awesome-agent** | Collection of useful prompted subagents for code review, API docs, QA, and more |
+| **AI-skill** | Skills for interacting with other AI tools - Codex, Gemini CLI, and collaboration fixes |
+| **pushover** | Pushover notification hooks - get notified when tasks complete or permissions are needed |
+| **mac** | macOS integration - speak, send iMessages, emails, manage calendar, and display stickies |
 
 ## Directory Structure
 
 ```
-cAI/
+my-agent-prompt/
 ├── .claude-plugin/
-│   └── plugin.json           # Plugin manifest
-├── agents/                   # Agent profiles
-├── commands/                 # Slash commands (invoked as /cAI:command)
-├── skills/                   # Skill definitions
-│   ├── codex/
-│   ├── gemini-cli/
+│   └── marketplace.json      # Marketplace manifest
+├── plugins/
+│   ├── awesome-agent/
+│   │   ├── .claude-plugin/plugin.json
+│   │   └── agents/           # 11 subagents
+│   ├── AI-skill/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── commands/         # collab-fix.md
+│   │   └── skills/
+│   │       ├── codex/
+│   │       └── gemini-cli/
+│   ├── pushover/
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── hooks/hooks.json
+│   │   ├── scripts/
+│   │   │   ├── hooks/        # Hook handlers
+│   │   │   └── service/      # Escalation service
+│   │   └── tools/
+│   │       └── pushover-notify/
 │   └── mac/
-├── hooks/
-│   └── hooks.json            # Hook configuration
-├── scripts/
-│   ├── hooks/                # Hook handlers
-│   └── service/              # Escalation service
-├── tools/
-│   └── pushover-notify/      # Notification script
-└── setup-service.sh          # One-time Pushover setup
+│       ├── .claude-plugin/plugin.json
+│       └── skills/mac/
+├── setup-service.sh          # One-time Pushover setup
+└── README.md
 ```
 
 ## Installation
 
-```bash
-# Install to user scope (personal, all projects)
-claude plugin install /path/to/cAI
+### Add the Marketplace
 
-# Or install to project scope (shared via git)
-claude plugin install /path/to/cAI --scope project
+```bash
+claude plugin marketplace add /path/to/my-agent-prompt
 ```
 
-### Pushover Setup (Optional)
+### Install Plugins
 
-For push notifications, run the one-time setup:
+You can enter claude interface and use /plugin to navigate to my marketplace and install each plugin. 
+
+```bash
+# Install all plugins
+claude plugin install awesome-agent@cAI-tools
+claude plugin install AI-skill@cAI-tools
+claude plugin install pushover@cAI-tools
+claude plugin install mac@cAI-tools
+```
+
+### Pushover Setup (for pushover plugin)
+
+Run the one-time setup to store your Pushover credentials in macOS Keychain:
 
 ```bash
 ./setup-service.sh
 ```
 
-This saves your Pushover credentials to macOS Keychain.
+Get your credentials from [pushover.net](https://pushover.net/).
 
-## Uninstallation
+## Plugin Details
 
-```bash
-claude plugin uninstall cAI
-```
+### awesome-agent
 
-This only removes this plugin - other plugins and settings remain intact.
+Specialized task agents for various workflows:
 
-## Mac Skill
+- `api-documenter` - API documentation generation
+- `code-reviewer` - Code review and suggestions
+- `llm-architect` - LLM system design
+- `mcp-developer` - MCP server development
+- `performance-engineer` - Performance optimization
+- `qa-expert` - Quality assurance
+- `qcodes-specialist` - QCodes instrumentation
+- `quantum-device-specialist` - Quantum device control
+- `test-automator` - Test automation
+- `tooling-engineer` - Developer tooling
+- `typescript-pro` - TypeScript expertise
 
-The `mac` skill enables Claude to interact with macOS native apps:
+### AI-skill
 
-| Feature | Script | Description |
-|---------|--------|-------------|
-| Text-to-Speech | `say` | Speak messages aloud |
-| iMessage | `imessage.sh` | Send iMessages |
-| Email | `imail.sh` | Send emails via Mail.app |
-| Calendar | `ical.sh` | List/add events (reads all, writes to "Agent" calendar) |
-| Stickies | `iStickies.sh` | Display notes with markdown support |
+Skills for AI tool integration:
 
-## Notification Hooks
+| Skill | Description |
+|-------|-------------|
+| codex | OpenAI Codex CLI integration |
+| gemini-cli | Google Gemini CLI integration |
 
-The plugin includes hooks for Pushover notifications:
+Command: `/AI-skill:collab-fix` - Collaborative multi-agent fix workflow
+
+### pushover
+
+Notification hooks for Pushover push notifications:
 
 | Hook | Trigger | Notification |
 |------|---------|--------------|
@@ -87,7 +115,29 @@ The plugin includes hooks for Pushover notifications:
 | Stop | Task completes | Low-priority "done" notification |
 | SessionEnd | Claude session ends | Cleans up service |
 
+### mac
+
+macOS native app integration:
+
+| Feature | Command | Description |
+|---------|---------|-------------|
+| Text-to-Speech | `say` | Speak messages aloud |
+| iMessage | `imessage.sh` | Send iMessages |
+| Email | `imail.sh` | Send emails via Mail.app |
+| Calendar | `ical.sh` | List/add events (reads all, writes to "Agent" calendar) |
+| Stickies | `iStickies.sh` | Display notes with markdown support |
+
+## Uninstallation
+
+```bash
+claude plugin uninstall awesome-agent@cAI-tools
+claude plugin uninstall AI-skill@cAI-tools
+claude plugin uninstall pushover@cAI-tools
+claude plugin uninstall mac@cAI-tools
+```
+
 ## Bash Timeout Settings
+For best experience with long-running tasks:
 
 Add to `~/.claude/settings.json` to extend bash timeouts:
 

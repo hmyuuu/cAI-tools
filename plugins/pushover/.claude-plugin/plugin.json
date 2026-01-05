@@ -1,0 +1,8 @@
+{
+  "name": "pushover",
+  "version": "1.0.0",
+  "description": "Pushover notification hooks - get notified when tasks complete or permissions are needed",
+  "author": {
+    "name": "caidish"
+  }
+}

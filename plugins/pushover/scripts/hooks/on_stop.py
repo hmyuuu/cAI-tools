@@ -56,14 +56,9 @@ def get_last_assistant_text(transcript_path: str, max_words: int = 100) -> str:
 
 def send_notification(title: str, message: str, priority: int = -1) -> None:
     """Send notification via po_notify."""
-    # Try plugin-relative path first (tools/pushover-notify/po_notify.py)
+    # Use plugin-relative path (tools/pushover-notify/po_notify.py)
     plugin_root = Path(__file__).parent.parent.parent
     po_notify = plugin_root / "tools" / "pushover-notify" / "po_notify.py"
-    if not po_notify.exists():
-        # Fallback to ~/bin/po_notify or system PATH
-        po_notify = Path("~/bin/po_notify").expanduser()
-        if not po_notify.exists():
-            po_notify = "po_notify"
 
     try:
         # po_notify uses: title message --priority N
