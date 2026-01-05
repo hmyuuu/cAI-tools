@@ -191,6 +191,6 @@ Examples:
 
 ### AI Workflow
 
-If changes are makde to a plugin
+If changes are made to a plugin
 1. Run `./tools/plugin-version.sh bump <plugin> patch` to increment version
 2. Run `./tools/plugin-version.sh status` to see status and update Claude
